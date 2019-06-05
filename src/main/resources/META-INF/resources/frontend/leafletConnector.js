@@ -4,85 +4,106 @@ window.Vaadin.Flow.leafletConnector = {
         if (c.$connector) {
             return;
         }
-        
+
+        var markers = [];
+        var activeMarker;
+        var markerLayer;
+
         c.$connector = {
 
-          setPoint : function(lat, lon) {
-            if(!this.marker) {
-              this.marker = L.marker([lat, lon],{draggable:true}).addTo(this.mymap);
-              this.marker.on('dragend', function(event){
-                var marker = event.target;
-                var position = marker.getLatLng();
-                c.$connector.center();
-                c.$server.updatePosition(position.lat, position.lng);
-              });
-            } else {
-              this.marker.setLatLng(L.latLng(lat, lon));
-            }
-            this.center();
-            c.$server.updatePosition(lat,lon);
-          },
+            addPoint: function (lat, lon) {
 
-          center : function() {
-            this.mymap.panTo(this.marker.getLatLng());
-          },
-          
-          setEditorContent : function(html) {
-            this.editor.setContent(html);
-          }
+                if (!markerLayer) {
+                    markerLayer = L.layerGroup();
+                    this.mymap.addLayer(markerLayer);
+                }
+
+                var marker = L.marker([lat, lon], {
+                    id: markers.length,
+                    draggable: true
+                }).addTo(markerLayer);
+
+                marker.on('dragend', function (event) {
+                    activeMarker = event.target;
+                    c.$connector.center(event.target);
+                    c.$connector.update();
+                });
+
+                markers.push(marker);
+                activeMarker = marker;
+
+                this.center(marker);
+                this.update();
+            },
+
+            setLocation: function(latitude, longitude) {
+                if (activeMarker) {
+                    activeMarker.setLatLng(L.latLng(latitude, longitude));
+                    this.center(activeMarker);
+                    this.update();
+                }
+            },
+
+            setActiveMarker: function (id) {
+                activeMarker = markers[id];
+                this.update();
+            },
+
+            center: function (point) {
+                this.mymap.panTo(point.getLatLng());
+            },
+
+            update: function () {
+                var markerCopy = [];
+                markers.forEach(function (marker) {
+                    markerCopy.push(
+                        {
+                            id: marker.options.id,
+                            latitude: marker.getLatLng().lat,
+                            longitude: marker.getLatLng().lng,
+                            active: marker === activeMarker
+                        });
+                });
+                c.$server.update(markerCopy);
+            },
+
+            clear: function () {
+                markers = [];
+                activeMarker = null;
+                if (markerLayer) {
+                    this.mymap.removeLayer(markerLayer);
+                }
+                markerLayer = null;
+                this.update();
+            }
+
         };
-        
+
         var currentValue = "";
 
-        const pushChanges = function() {
-          c.$server.updateValue(currentValue)
+        const pushChanges = function () {
+            c.$server.updateValue(currentValue)
         }
 
         var mymap = c.$connector.mymap = L.map(c.id).setView([61, 22], 5);
 
-        L.DomUtil.addClass(mymap._container,'crosshair-cursor-enabled');
+        L.DomUtil.addClass(mymap._container, 'crosshair-cursor-enabled');
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data © <a href=\"https://openstreetmap.org\">OpenStreetMap</a> contributors',
-        maxZoom: 18,
-      }).addTo(mymap);
+            attribution: 'Map data © <a href=\"https://openstreetmap.org\">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+        }).addTo(mymap);
 
-      c.style.cursor = "crosshair";
+        c.style.cursor = "crosshair";
 
-      function onMapClick(e) {
-        c.$connector.setPoint(e.latlng.lat, e.latlng.lng);
-      }
-    
-      mymap.on('click', onMapClick);
-
-/*
-        var baseconfig =  JSON.parse(customConfig) || {
-          height: 500,
-          plugins: [
-            'advlist autolink lists link image charmap print preview anchor',
-            'searchreplace visualblocks code fullscreen',
-            'insertdatetime media table contextmenu paste code'
-          ],
-          toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+        function onMapClick(e) {
+            if (activeMarker) {
+                c.$connector.setLocation(e.latlng.lat, e.latlng.lng);
+            } else {
+                c.$connector.addPoint(e.latlng.lat, e.latlng.lng)
+            }
         }
-        baseconfig['selector'] =  "#" + c.firstChild.id;
-        baseconfig['setup'] = function(ed) {
-          c.$connector.editor = ed;
-          ed.on('setContent', function(e) {
-                console.error('Editor content was set');
-                currentValue = ed.getContent();
-          });
-          ed.on('change', function(e) {
-                console.error('Editor was changed');
-                currentValue = ed.getContent();
-          });
-          ed.on('blur', function(e) {
-            console.error('Editor was blurred');
-            currentValue = ed.getContent();
-            pushChanges();
-          });
-        };
-*/
 
+        mymap.on('click', onMapClick);
     }
-}
+};
