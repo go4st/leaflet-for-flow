@@ -16,7 +16,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
     <organization>
-        <name>Matti Tahvonen</name>
+        <name>Matti Tahvonen, August Gilg</name>
     </organization>
     <licenses>
         <license>
@@ -27,15 +27,15 @@
     </licenses>
     
     <scm>
-        <url>https://github.com/mstahv/leaflet-for-flow</url>
-        <connection>scm:git:git://github.com/mstahv/leaflet-for-flow.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:/mstahv/leaflet-for-flow.git</developerConnection>
+        <url>https://github.com/go4st/leaflet-for-flow</url>
+        <connection>scm:git:git://github.com/go4st/leaflet-for-flow.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:/go4st/leaflet-for-flow.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/mstahv/leaflet-for-flow/issues</url>
+        <url>https://github.com/go4st/leaflet-for-flow/issues</url>
     </issueManagement>
 
     <dependencyManagement>
@@ -45,7 +45,7 @@
                 <artifactId>vaadin-bom</artifactId>
                 <type>pom</type>
                 <scope>import</scope>
-                <version>11.0.2</version>
+                <version>13.0.8</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -63,9 +63,8 @@
             <artifactId>flow-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.github.legioth</groupId>
-            <artifactId>field</artifactId>
-            <version>0.10.0</version>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-data</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -76,12 +75,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.locationtech.jts</groupId>
-            <artifactId>jts-core</artifactId>
-            <version>1.16.0</version>
         </dependency>
 
     </dependencies>
@@ -147,7 +140,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.1.0</version>
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
