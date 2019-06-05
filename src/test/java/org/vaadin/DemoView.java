@@ -2,14 +2,13 @@ package org.vaadin;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import org.vaadin.leaflet.LeafletPointSelector;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.Route;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import org.vaadin.leaflet.LeafletPoint;
+import org.vaadin.leaflet.LeafletPointSelector;
+
+import java.util.Collections;
 
 @Route
 public class DemoView extends Div {
@@ -22,12 +21,16 @@ public class DemoView extends Div {
         add(map);
 
         Button b2 = new Button("Show content", e -> {
-            Notification.show(map.getValue().toString());
+            Notification.show(map.getPoints().toString());
+            map.getPoints().stream()
+                    .filter(LeafletPoint::isActiveMarker)
+                    .findFirst()
+                    .ifPresent(active -> Notification.show("Selected: " + active.getId()));
         });
         add(b2);
         Button b4 = new Button("Set value Point(50, 10)", e -> {
-            Point createPoint = new GeometryFactory().createPoint(new Coordinate(10, 50));
-            map.setValue(createPoint);
+            LeafletPoint createPoint = new LeafletPoint(10, 50);
+            map.addPoint(createPoint);
         });
         add(b4);
         
@@ -42,6 +45,12 @@ public class DemoView extends Div {
         });
         add(b3);
 
-        
+        Button b6 = new Button("Add point");
+        b6.addClickListener(event -> map.addPoint(new LeafletPoint(Math.random()*10, Math.random()*50)));
+        add(b6);
+
+        Button b7 = new Button("Clear");
+        b7.addClickListener(event -> map.clearPoints());
+        add(b7);
     }
 }
