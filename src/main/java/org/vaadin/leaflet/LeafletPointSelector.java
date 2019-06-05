@@ -62,6 +62,15 @@ public class LeafletPointSelector extends Component implements HasSize {
                 .callFunction("$connector.setLocation", latitude, longitude));
     }
 
+    public LeafletPoint getActivePoint() {
+        return activePoint;
+    }
+
+    public void setActivePoint(LeafletPoint activePoint) {
+        runBeforeClientResponse(ui -> getElement()
+                .callFunction("$connector.setActiveMarker", activePoint.getId()));
+    }
+
     public void clearPoints() {
         getElement().callFunction("$connector.clear");
     }
